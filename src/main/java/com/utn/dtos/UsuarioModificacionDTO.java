@@ -1,11 +1,10 @@
 package com.utn.dtos;
 
-public record UsuarioDTO(
-
+public record UsuarioModificacionDTO(
         String nombre,
         String apellido,
         String mail,
-        String celular
-
+        String celular,
+        String contrasena
 ) {
 }

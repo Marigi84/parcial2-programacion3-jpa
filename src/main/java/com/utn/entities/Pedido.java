@@ -35,8 +35,15 @@ public class Pedido extends Base implements Calculable {
     private FormaPago formaPago;
 
     @Builder.Default
-    @OneToMany( cascade = { CascadeType.PERSIST, CascadeType.MERGE },
-            fetch = FetchType.LAZY, orphanRemoval = true )
+    @OneToMany(
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE,
+                    CascadeType.REMOVE
+            },
+            fetch = FetchType.LAZY,
+            orphanRemoval = true
+    )
     @JoinColumn(name = "pedido_id", nullable = false)
     private Set<DetallePedido> detalles = new HashSet<>();
 
