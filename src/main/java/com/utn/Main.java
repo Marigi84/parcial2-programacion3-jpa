@@ -186,6 +186,9 @@ public class Main {
         do {
             System.out.println("\n===== REPORTES =====");
             System.out.println("1. Productos por categoria");
+            System.out.println("2. Pedidos por usuario");
+            System.out.println("3. Pedidos por estado");
+            System.out.println("4. Total facturado");
             System.out.println("0. Volver");
             System.out.print("Seleccione una opcion: ");
 
@@ -193,12 +196,17 @@ public class Main {
 
             switch (opcion) {
                 case 1 -> productosPorCategoria();
+                case 2 -> pedidosPorUsuario();
+                case 3 -> pedidosPorEstado();
+                case 4 -> totalFacturado();
                 case 0 -> System.out.println("Volviendo al menu principal...");
                 default -> System.out.println("Opcion invalida.");
             }
 
         } while (opcion != 0);
     }
+
+
 
     private static void cargarDatosInicialesSiNoExisten() {
 
@@ -798,45 +806,6 @@ public class Main {
         );
     }
 
-    // ===== METODOS DE REPORTES =====
-
-    private static void productosPorCategoria() {
-        System.out.println("\n===== PRODUCTOS POR CATEGORIA =====");
-
-        Categoria categoria = seleccionarCategoriaActiva();
-
-        if (categoria == null) {
-            return;
-        }
-
-        var productos = productoRepository.buscarPorCategoria(categoria.getId());
-
-        if (productos.isEmpty()) {
-            System.out.println("No hay productos activos para la categoria: "
-                    + categoria.getNombre());
-            return;
-        }
-
-        var productosDTO = productos.stream()
-                .sorted(Comparator.comparing(producto -> producto.getNombre()))
-                .map(producto -> new ProductoReporteDTO(
-                        producto.getId(),
-                        producto.getNombre(),
-                        producto.getPrecio(),
-                        producto.getStock()
-                ))
-                .toList();
-
-        System.out.println("\nProductos activos de la categoria: "
-                + categoria.getNombre());
-
-        productosDTO.forEach(dto ->
-                System.out.println("ID: " + dto.id()
-                        + " | Nombre: " + dto.nombre()
-                        + " | Precio: $" + dto.precio()
-                        + " | Stock: " + dto.stock())
-        );
-    }
 
     // ===== METODOS DE USUARIOS =====
 
@@ -1349,4 +1318,57 @@ public class Main {
             System.out.println("Ocurrio un problema inesperado al registrar el pedido.");
         }
     }
+
+    // ===== METODOS DE REPORTES =====
+
+    private static void productosPorCategoria() {
+        System.out.println("\n===== PRODUCTOS POR CATEGORIA =====");
+
+        Categoria categoria = seleccionarCategoriaActiva();
+
+        if (categoria == null) {
+            return;
+        }
+
+        var productos = productoRepository.buscarPorCategoria(categoria.getId());
+
+        if (productos.isEmpty()) {
+            System.out.println("No hay productos activos para la categoria: "
+                    + categoria.getNombre());
+            return;
+        }
+
+        var productosDTO = productos.stream()
+                .sorted(Comparator.comparing(producto -> producto.getNombre()))
+                .map(producto -> new ProductoReporteDTO(
+                        producto.getId(),
+                        producto.getNombre(),
+                        producto.getPrecio(),
+                        producto.getStock()
+                ))
+                .toList();
+
+        System.out.println("\nProductos activos de la categoria: "
+                + categoria.getNombre());
+
+        productosDTO.forEach(dto ->
+                System.out.println("ID: " + dto.id()
+                        + " | Nombre: " + dto.nombre()
+                        + " | Precio: $" + dto.precio()
+                        + " | Stock: " + dto.stock())
+        );
+    }
+
+    private static void totalFacturado() {
+        System.out.println("\n===== TOTAL FACTURADO =====");
+
+        var pedidosTerminados = pedidoRepository.buscarPorEstado(Estado.TERMINADO);
+
+        double total = pedidosTerminados.stream()
+                .mapToDouble(pedido -> pedido.getTotal() != null ? pedido.getTotal() : 0.0)
+                .sum();
+
+        System.out.println("Total facturado: " + String.format(java.util.Locale.US, "$%.2f", total));
+    }
+
 }
